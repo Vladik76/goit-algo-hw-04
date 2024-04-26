@@ -1,3 +1,6 @@
+import os
+
+
 def parse_input(user_input):
     """
     This function parses usder input and return command and list of the arguments
@@ -15,6 +18,7 @@ def add_contact(args, contacts:dict)->str:
         name, phone = args
         if not contacts.get(name): #trying to get contact from the dict
             contacts[name] = phone #adding new if not found
+            save_phonebook(contacts)
             return "Contact added."
         else:
             return "Cannot add contact. Contact with the same name already exists."
@@ -30,12 +34,29 @@ def change_contact(args,contacts:dict)->str:
         name, phone = args
         if contacts.get(name):
             contacts[name] = phone
+            save_phonebook(contacts)
             return "Contact updated."
         else:
             return f"Cannot update contact. Contact {name} does not exist."
     else:
         return "Incorrect input format."
-    
+
+def delete_contact(args,contacts:dict)->str:
+    """
+    This function deletes existing contact.
+    Returns an error if contact does not exist
+    """
+    if len(args) == 1:
+        name=args[0]
+        if contacts.get(name):
+            del contacts[name]
+            save_phonebook(contacts)
+            return "Contact deleted."
+        else:
+            return f"Cannot delete contact. Contact {args} does not exist."
+    else:
+        return "Incorrect input format."
+
 def show_contacts(contacts:dict)->str:
     """
     This function returns contacts added to the dictionary
@@ -46,9 +67,43 @@ def show_contacts(contacts:dict)->str:
         list_of_contacts+=f"{name:^10}{phone:^10}\n"
     
     return list_of_contacts
-    
+
+def show_contact(args,contacts:dict)->str:
+    if len(args) == 1:
+        name = args[0]
+        if contacts.get(name):
+            return f"The phone number for the contact {name} is {contacts.get(name)}."
+        else:
+            return f"Contact {name} does not exist."
+    else:
+        return "Incorrect input format."
+
+def load_phonebook()->dict:
+    """
+    This function loads contacts from the phonebook.txt
+    If file does not exist it creates empty one
+    """
+    contacts={}
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/phonebook.txt", 'a+') as phonebook_file: #creating new file if it does not exist
+        phonebook_file.seek(0)
+        for line in phonebook_file:
+            (key, val) = line.split(",")
+            if val.strip() != "":
+                contacts[key] = val.strip()
+
+    return contacts
+
+def save_phonebook(contacts:dict):
+    """
+    Function saves the contacts dictionary to the file
+    """
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/phonebook.txt", 'w') as phonebook_file:
+        for name in sorted(contacts.keys()):
+            phonebook_file.write(f"{name},{contacts.get(name)}\n")
+
+        
 def main():
-    contacts = {}
+    contacts = load_phonebook()
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
@@ -63,8 +118,12 @@ def main():
             print(add_contact(args, contacts))
         elif command == "change":
             print(change_contact(args, contacts))
+        elif command in ["delete","del"]:
+            print(delete_contact(args, contacts))
         elif command == "all":
             print(show_contacts(contacts))
+        elif command == "phone":
+            print(show_contact(args,contacts))
         else:
             print("Invalid command.")
 
