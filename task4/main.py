@@ -84,7 +84,7 @@ def load_phonebook()->dict:
     If file does not exist it creates empty one
     """
     contacts={}
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/phonebook.txt", 'a+') as phonebook_file: #creating new file if it does not exist
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/phonebook.txt", 'a+',encoding="utf-8") as phonebook_file: #creating new file if it does not exist
         phonebook_file.seek(0)
         for line in phonebook_file:
             (key, val) = line.split(",")
@@ -97,7 +97,7 @@ def save_phonebook(contacts:dict):
     """
     Function saves the contacts dictionary to the file
     """
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/phonebook.txt", 'w') as phonebook_file:
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/phonebook.txt", 'w',encoding="utf-8") as phonebook_file:
         for name in sorted(contacts.keys()):
             phonebook_file.write(f"{name},{contacts.get(name)}\n")
 
